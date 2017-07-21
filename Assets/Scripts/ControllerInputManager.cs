@@ -18,8 +18,10 @@ public class ControllerInputManager: MonoBehaviour {
 
     private LineRenderer TeleportLine;
     private Vector3 TeleporterLocation;
-    
-    
+
+    //Grabing&Throwing
+    public float throwForce = 1.5f;
+
 
     // Use this for initialization
     void Start () {
@@ -73,4 +75,46 @@ public class ControllerInputManager: MonoBehaviour {
             TeleporterTargetObject.SetActive(false);
         }
 	}
+    //Grab the object
+    private void OnTriggerStay(Collider other)
+    {
+        if (leftController.GetPressDown(SteamVR_Controller.ButtonMask.Grip))
+        {
+            GrabbingObject(LeftTrackOBJ, other);
+        }
+        else if(leftController.GetPressUp(SteamVR_Controller.ButtonMask.Grip))
+        {
+            
+        }
+        if (rightController.GetPressDown(SteamVR_Controller.ButtonMask.Grip))
+        {
+            GrabbingObject(rightTrackOBJ, other);
+        }
+        else if (rightController.GetPressUp(SteamVR_Controller.ButtonMask.Grip))
+        {
+
+        }
+    }
+
+    void GrabbingObject(SteamVR_TrackedObject TraceObject, Collider GrabbingOBJ)
+    {
+        if (GrabbingOBJ.CompareTag("Throwable"))
+        {
+            GrabbingOBJ.transform.SetParent(TraceObject.transform);
+            GrabbingOBJ.GetComponent<Rigidbody>().isKinematic = true;
+            SteamVR_Controller.Input((int)TraceObject.index).TriggerHapticPulse(2000);
+        }
+    }
+
+    void ThrowingObject(SteamVR_Controller.Device device, Collider GrabbingOBJ)
+    {
+        if (GrabbingOBJ.CompareTag("Throwable"))
+        {
+            GrabbingOBJ.transform.SetParent(null);
+            Rigidbody colliRid = GrabbingOBJ.GetComponent<Rigidbody>();
+            colliRid.isKinematic = false;
+            colliRid.velocity = device.velocity * throwForce;
+            colliRid.angularVelocity = device.angularVelocity;
+        }
+    }
 }
