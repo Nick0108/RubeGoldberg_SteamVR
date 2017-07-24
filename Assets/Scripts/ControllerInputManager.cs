@@ -30,10 +30,25 @@ public class ControllerInputManager: MonoBehaviour {
     private LineRenderer TeleportLine;
     private Vector3 TeleporterLocation;
 
+    //Menu
+    public GameObject MenuCanvas;
+    //public List<GameObject> InstanBasicObject;
+    //public List<GameObject> InstanComplexObject;
+    //public int BasicIndex;
+    //public int ComplexIndex;
+    //public bool isBasic = true;
+
+    //Swipe
+    public float Touchcurrent;
+    public float TouchLast;
+    public float SwipeSum;
+    public float distance;
+    public bool hasSwipeLeft;
+    public bool hasSwipeRight;
+
     //Grabing&Throwing
     [SerializeField,Range(1.0f,2.0f)]
     public float throwForce = 1.5f;
-
 
     // Use this for initialization
     void Start () {
@@ -95,9 +110,76 @@ public class ControllerInputManager: MonoBehaviour {
         //(only RightHand) --->for menu
         if (forHand == Hand.RightHand)
         {
+            //memu apearing
+            if (ControllerDevice.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
+            {
+                MenuAppear();
 
+                if (ControllerDevice.GetTouchDown(SteamVR_Controller.ButtonMask.Touchpad))
+                {
+                    TouchLast = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).x;
+                }
+                if (ControllerDevice.GetTouch(SteamVR_Controller.ButtonMask.Touchpad))
+                {
+                    Touchcurrent = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).x;
+                    distance = Touchcurrent - TouchLast;
+                    TouchLast = Touchcurrent;
+                    SwipeSum += distance;
+
+                    if (!hasSwipeRight)
+                    {
+                        if (SwipeSum > 0.5f)
+                        {
+                            SwipeRight();
+                            hasSwipeRight = true;
+                            hasSwipeLeft = false;
+                        }
+                    }
+                    if (!hasSwipeRight)
+                    {
+                        if (SwipeSum < -0.5f)
+                        {
+                            SwipeLeft();
+                            hasSwipeRight = false;
+                            hasSwipeLeft = true;
+                        }
+                    }
+                }
+                if (ControllerDevice.GetTouchUp(SteamVR_Controller.ButtonMask.Touchpad))
+                {
+                    Touchcurrent = 0;
+                    TouchLast = 0;
+                    distance = 0;
+                    SwipeSum = 0;
+                    hasSwipeLeft = false;
+                    hasSwipeRight = false;
+                }
+            }
+            if (ControllerDevice.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
+            {
+                MenuDisappear();
+            }
         }
 	}
+
+    private void SwipeRight()
+    {
+        MenuCanvas.SwipeRight();
+    }
+
+    private void SwipeLeft()
+    {
+        MenuCanvas.SwipeLeft();
+    }
+
+    private void MenuAppear()
+    {
+        MenuCanvas.Appear();
+    }
+    private void MenuDisappear()
+    {
+        MenuCanvas.Disappear();
+    }
 
     //Grab and Throw the object
     private void OnTriggerStay(Collider other)
