@@ -31,20 +31,28 @@ public class ControllerInputManager: MonoBehaviour {
     private Vector3 TeleporterLocation;
 
     //Menu
-    public GameObject MenuCanvas;
+    public ObjectMenuManager objectMenuManager;
     //public List<GameObject> InstanBasicObject;
     //public List<GameObject> InstanComplexObject;
     //public int BasicIndex;
     //public int ComplexIndex;
     //public bool isBasic = true;
 
-    //Swipe
-    public float Touchcurrent;
-    public float TouchLast;
-    public float SwipeSum;
-    public float distance;
-    public bool hasSwipeLeft;
-    public bool hasSwipeRight;
+    //Swipe_x
+    public float Touchcurrent_x;
+    public float TouchLast_x;
+    public float SwipeSum_x;
+    public float distance_x;
+    public bool hasSwipeLeft_x;
+    public bool hasSwipeRight_x;
+
+    //Swipe_y
+    public float Touchcurrent_y;
+    public float TouchLast_y;
+    public float SwipeSum_y;
+    public float distance_y;
+    public bool hasSwipeLeft_y;
+    public bool hasSwipeRight_y;
 
     //Grabing&Throwing
     [SerializeField,Range(1.0f,2.0f)]
@@ -117,44 +125,76 @@ public class ControllerInputManager: MonoBehaviour {
 
                 if (ControllerDevice.GetTouchDown(SteamVR_Controller.ButtonMask.Touchpad))
                 {
-                    TouchLast = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).x;
+                    //Record the Axis of x and y on firstTouch
+                    TouchLast_x = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).x;
+                    TouchLast_y = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).y;
                 }
                 if (ControllerDevice.GetTouch(SteamVR_Controller.ButtonMask.Touchpad))
                 {
-                    Touchcurrent = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).x;
-                    distance = Touchcurrent - TouchLast;
-                    TouchLast = Touchcurrent;
-                    SwipeSum += distance;
+                    //Record the Axis x on its moving distance
+                    Touchcurrent_x = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).x;
+                    distance_x = Touchcurrent_x - TouchLast_x;
+                    TouchLast_x = Touchcurrent_x;
+                    SwipeSum_x += distance_x;
 
-                    if (!hasSwipeRight)
+                    //Record the Axis y on its moving distance
+                    Touchcurrent_y = ControllerDevice.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Touchpad).y;
+                    distance_y = Touchcurrent_y - TouchLast_y;
+                    TouchLast_y = Touchcurrent_y;
+                    SwipeSum_y += distance_y;
+
+                    //if Axis x's swipe distance >0.5, then change selected Object
+                    if (!hasSwipeRight_x)
                     {
-                        if (SwipeSum > 0.5f)
+                        if (SwipeSum_x > 0.5f)
                         {
                             SwipeRight();
-                            hasSwipeRight = true;
-                            hasSwipeLeft = false;
+                            hasSwipeRight_x = true;
+                            hasSwipeLeft_x = false;
                         }
                     }
-                    if (!hasSwipeRight)
+                    if (!hasSwipeRight_x)
                     {
-                        if (SwipeSum < -0.5f)
+                        if (SwipeSum_x < -0.5f)
                         {
                             SwipeLeft();
-                            hasSwipeRight = false;
-                            hasSwipeLeft = true;
+                            hasSwipeRight_x = false;
+                            hasSwipeLeft_x = true;
+                        }
+                    }
+
+                    //if Axis y's swipe distance >0.5, then change selected Munu
+                    if (!hasSwipeRight_y)
+                    {
+                        if (SwipeSum_y > 0.5f)
+                        {
+                            SwipeUP();
+                            hasSwipeRight_y = true;
+                            hasSwipeLeft_y = false;
+                        }
+                    }
+                    if (!hasSwipeRight_y)
+                    {
+                        if (SwipeSum_y < -0.5f)
+                        {
+                            SwipeDown();
+                            hasSwipeRight_y = false;
+                            hasSwipeLeft_y = true;
                         }
                     }
                 }
+                //if leave the touchpad ,reSet the touch number
                 if (ControllerDevice.GetTouchUp(SteamVR_Controller.ButtonMask.Touchpad))
                 {
-                    Touchcurrent = 0;
-                    TouchLast = 0;
-                    distance = 0;
-                    SwipeSum = 0;
-                    hasSwipeLeft = false;
-                    hasSwipeRight = false;
+                    Touchcurrent_x = 0;
+                    TouchLast_x = 0;
+                    distance_x = 0;
+                    SwipeSum_x = 0;
+                    hasSwipeLeft_x = false;
+                    hasSwipeRight_x = false;
                 }
             }
+            //Menu disappear
             if (ControllerDevice.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
             {
                 MenuDisappear();
@@ -164,22 +204,34 @@ public class ControllerInputManager: MonoBehaviour {
 
     private void SwipeRight()
     {
-        MenuCanvas.SwipeRight();
+        objectMenuManager.SwipeRight();
     }
 
     private void SwipeLeft()
     {
-        MenuCanvas.SwipeLeft();
+        objectMenuManager.SwipeLeft();
+    }
+
+    private void SwipeUP()
+    {
+        objectMenuManager.SwipeUp();
+    }
+
+    private void SwipeDown()
+    {
+        objectMenuManager.SwipeDown();
     }
 
     private void MenuAppear()
     {
-        MenuCanvas.Appear();
+        objectMenuManager.Appear();
     }
+
     private void MenuDisappear()
     {
-        MenuCanvas.Disappear();
+        objectMenuManager.Disappear();
     }
+    
 
     //Grab and Throw the object
     private void OnTriggerStay(Collider other)
