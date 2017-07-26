@@ -12,18 +12,25 @@ public class ControllerInspector : Editor {
         private ControllerInputManager controllerInputManager;  
 
         private SerializedProperty hand;
-
+        //LeftHand
         private SerializedProperty TeleporterTargetObject;
         private SerializedProperty Player;
         private SerializedProperty TeleporterLayer;
+        //RightHand
+        private SerializedProperty objectMenuManager;
+        //Both hand
         private SerializedProperty throwForce;
 
         void OnEnable()  
         {  
             obj = new SerializedObject(target);
+            //LeftHand
             TeleporterTargetObject = obj.FindProperty("TeleporterTargetObject");
             Player = obj.FindProperty("Player");
             TeleporterLayer = obj.FindProperty("TeleporterLayer");
+            //RightHand
+            objectMenuManager = obj.FindProperty("objectMenuManager");
+            //Both hand
             throwForce = obj.FindProperty("throwForce");
         }  
       
@@ -37,6 +44,10 @@ public class ControllerInspector : Editor {
                 EditorGUILayout.PropertyField(TeleporterTargetObject);
                 EditorGUILayout.PropertyField(Player);
                 EditorGUILayout.PropertyField(TeleporterLayer);
+            }
+            if (controllerInputManager.forHand == ControllerInputManager.Hand.RightHand)
+            {
+                EditorGUILayout.PropertyField(objectMenuManager);
             }
             EditorGUILayout.PropertyField(throwForce);
         }  

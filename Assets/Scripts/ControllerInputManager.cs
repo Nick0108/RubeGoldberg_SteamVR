@@ -39,20 +39,20 @@ public class ControllerInputManager: MonoBehaviour {
     //public bool isBasic = true;
 
     //Swipe_x
-    public float Touchcurrent_x;
-    public float TouchLast_x;
-    public float SwipeSum_x;
-    public float distance_x;
-    public bool hasSwipeLeft_x;
-    public bool hasSwipeRight_x;
+    private float Touchcurrent_x;
+    private float TouchLast_x;
+    private float SwipeSum_x;
+    private float distance_x;
+    private bool hasSwipeLeft_x;
+    private bool hasSwipeRight_x;
 
     //Swipe_y
-    public float Touchcurrent_y;
-    public float TouchLast_y;
-    public float SwipeSum_y;
-    public float distance_y;
-    public bool hasSwipeLeft_y;
-    public bool hasSwipeRight_y;
+    private float Touchcurrent_y;
+    private float TouchLast_y;
+    private float SwipeSum_y;
+    private float distance_y;
+    private bool hasSwipeLeft_y;
+    private bool hasSwipeRight_y;
 
     //Grabing&Throwing
     [SerializeField,Range(1.0f,2.0f)]
@@ -148,15 +148,17 @@ public class ControllerInputManager: MonoBehaviour {
                     {
                         if (SwipeSum_x > 0.5f)
                         {
+                            SwipeSum_x = 0;
                             SwipeRight();
                             hasSwipeRight_x = true;
                             hasSwipeLeft_x = false;
                         }
                     }
-                    if (!hasSwipeRight_x)
+                    if (!hasSwipeLeft_x)
                     {
                         if (SwipeSum_x < -0.5f)
                         {
+                            SwipeSum_x = 0;
                             SwipeLeft();
                             hasSwipeRight_x = false;
                             hasSwipeLeft_x = true;
@@ -168,15 +170,17 @@ public class ControllerInputManager: MonoBehaviour {
                     {
                         if (SwipeSum_y > 0.5f)
                         {
+                            SwipeSum_y = 0;
                             SwipeUP();
                             hasSwipeRight_y = true;
                             hasSwipeLeft_y = false;
                         }
                     }
-                    if (!hasSwipeRight_y)
+                    if (!hasSwipeLeft_y)
                     {
                         if (SwipeSum_y < -0.5f)
                         {
+                            SwipeSum_y = 0;
                             SwipeDown();
                             hasSwipeRight_y = false;
                             hasSwipeLeft_y = true;
