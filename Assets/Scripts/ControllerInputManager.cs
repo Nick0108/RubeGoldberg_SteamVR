@@ -197,6 +197,10 @@ public class ControllerInputManager: MonoBehaviour {
                     hasSwipeLeft_x = false;
                     hasSwipeRight_x = false;
                 }
+                if (ControllerDevice.GetPressDown(SteamVR_Controller.ButtonMask.Touchpad))
+                {
+                    SpawnObject();
+                }
             }
             //Menu disappear
             if (ControllerDevice.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
@@ -236,6 +240,10 @@ public class ControllerInputManager: MonoBehaviour {
         objectMenuManager.Disappear();
     }
     
+    private void SpawnObject()
+    {
+        objectMenuManager.SpawnObject();
+    }
 
     //Grab and Throw the object
     private void OnTriggerStay(Collider other)

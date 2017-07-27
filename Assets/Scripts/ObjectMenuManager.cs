@@ -7,7 +7,7 @@ public class ObjectMenuManager : MonoBehaviour {
 
     public List<GameObject> BasicObjects;
     public List<GameObject> ComplexObjects;
-    public List<GameObject> CurrentList;
+    private List<GameObject> CurrentList;
 
     public List<Sprite> BasicObjectImages;
     public List<Sprite> ComplexObjectImages;
@@ -136,5 +136,10 @@ public class ObjectMenuManager : MonoBehaviour {
             else
                 ComplexLeftImage.sprite = ComplexObjectImages[currentIndex + 1];
         }
+    }
+
+    public void SpawnObject()
+    {
+        Instantiate(CurrentList[currentIndex], CurrentList[currentIndex].transform.position, CurrentList[currentIndex].transform.rotation);
     }
 }
