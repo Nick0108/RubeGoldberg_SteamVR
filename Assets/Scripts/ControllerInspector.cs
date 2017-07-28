@@ -11,7 +11,7 @@ public class ControllerInspector : Editor {
         private SerializedObject obj;  
         private ControllerInputManager controllerInputManager;  
 
-        private SerializedProperty hand;
+        //private SerializedProperty hand;
         //LeftHand
         private SerializedProperty TeleporterTargetObject;
         private SerializedProperty Player;

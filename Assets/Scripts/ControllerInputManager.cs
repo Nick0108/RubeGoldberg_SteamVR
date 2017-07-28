@@ -260,7 +260,13 @@ public class ControllerInputManager: MonoBehaviour {
 
     void GrabbingObject(Collider GrabbingOBJ)
     {
-        if (GrabbingOBJ.CompareTag("Throwable"))
+        if (GrabbingOBJ.CompareTag("Throwable") && BallReset.ballThrowable)
+        {
+            GrabbingOBJ.transform.SetParent(gameObject.transform);
+            GrabbingOBJ.GetComponent<Rigidbody>().isKinematic = true;
+            ControllerDevice.TriggerHapticPulse(2000);
+        }
+        if (GrabbingOBJ.CompareTag("Structure"))
         {
             GrabbingOBJ.transform.SetParent(gameObject.transform);
             GrabbingOBJ.GetComponent<Rigidbody>().isKinematic = true;
@@ -277,6 +283,17 @@ public class ControllerInputManager: MonoBehaviour {
             colliRid.isKinematic = false;
             colliRid.velocity = ControllerDevice.velocity * throwForce;
             colliRid.angularVelocity = ControllerDevice.angularVelocity;
+            if (!BallReset.ballThrowable)
+            {
+                GrabbingOBJ.GetComponent<MeshRenderer>().material.color = Color.red;
+                GrabbingOBJ.gameObject.layer = LayerMask.NameToLayer("AntiCheat");
+            }
+        }
+        if (GrabbingOBJ.CompareTag("Structure"))
+        {
+            GrabbingOBJ.transform.SetParent(null);
+            Rigidbody colliRid = GrabbingOBJ.GetComponent<Rigidbody>();
+            colliRid.isKinematic = false;
         }
     }
 }
