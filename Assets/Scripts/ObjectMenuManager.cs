@@ -30,11 +30,14 @@ public class ObjectMenuManager : MonoBehaviour {
     public Text ComplexLeftText;
     public Text ComplexRightText;
 
+    public Text SpawnNum;
+
     int BasicIndex;
     int ComplexIndex;
     int currentIndex;
 
     bool isBasic;
+    public MyGameManager myGameManager;
 
     private void Start()
     {
@@ -115,31 +118,57 @@ public class ObjectMenuManager : MonoBehaviour {
         if (isBasic)
         {
             BasicMiddleImage.sprite = BasicObjectImages[currentIndex];
+            BasicMiddleText.text = BasicMiddleImage.sprite.name;
             if (currentIndex - 1 < 0)
                 BasicLeftImage.sprite = BasicObjectImages[BasicObjectImages.Count - 1];
             else
                 BasicLeftImage.sprite = BasicObjectImages[currentIndex - 1];
+            BasicLeftText.text = BasicLeftImage.sprite.name;
+
             if (currentIndex + 1 > BasicObjectImages.Count - 1)
                 BasicRightImage.sprite = BasicObjectImages[0];
             else
                 BasicLeftImage.sprite = BasicObjectImages[currentIndex + 1];
+            BasicRightText.text = BasicRightImage.sprite.name;
         }
         else
         {
             ComplexMiddleImage.sprite = ComplexObjectImages[currentIndex];
+            ComplexMiddleText.text = ComplexMiddleImage.sprite.name;
             if (currentIndex - 1 < 0)
                 ComplexLeftImage.sprite = ComplexObjectImages[ComplexObjectImages.Count - 1];
             else
                 ComplexLeftImage.sprite = ComplexObjectImages[currentIndex - 1];
+            ComplexLeftText.text = ComplexLeftImage.sprite.name;
+
             if (currentIndex + 1 > ComplexObjectImages.Count - 1)
                 ComplexRightImage.sprite = ComplexObjectImages[0];
             else
                 ComplexLeftImage.sprite = ComplexObjectImages[currentIndex + 1];
+            ComplexRightText.text = ComplexRightImage.sprite.name;
         }
     }
 
     public void SpawnObject()
     {
-        Instantiate(CurrentList[currentIndex], CurrentList[currentIndex].transform.position, CurrentList[currentIndex].transform.rotation);
+        if (myGameManager.SpawnNum > 0)
+        {
+            GameObject newObject;
+            newObject = Instantiate(CurrentList[currentIndex], CurrentList[currentIndex].transform.position, CurrentList[currentIndex].transform.rotation);
+            newObject.tag = "Structure";
+
+            Collider[] newObjectColliders = newObject.GetComponentsInChildren<Collider>();
+            foreach (Collider collider in newObjectColliders)
+            {
+                collider.enabled = true;
+            }
+            Rigidbody[] newObjectRigidbodys = newObject.GetComponentsInChildren<Rigidbody>();
+            foreach (Rigidbody rigid in newObjectRigidbodys)
+            {
+                rigid.isKinematic = false;
+            }
+            myGameManager.SpawnNum--;
+            SpawnNum.text = "SpawnNum : " + myGameManager.SpawnNum;
+        }
     }
 }
