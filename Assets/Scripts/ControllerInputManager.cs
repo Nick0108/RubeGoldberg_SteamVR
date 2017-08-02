@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 public class ControllerInputManager: MonoBehaviour {
 
@@ -26,12 +25,14 @@ public class ControllerInputManager: MonoBehaviour {
     public GameObject TeleporterTargetObject;
     public GameObject Player;
     public LayerMask TeleporterLayer;
+    public LineRenderer TeleportLineRender;
 
-    private LineRenderer TeleportLine;
     private Vector3 TeleporterLocation;
+    private bool isCanTeleport = false;
 
     //Menu
     public ObjectMenuManager objectMenuManager;
+    public UIObjectMenuManager UIOBjects;
     //public List<GameObject> InstanBasicObject;
     //public List<GameObject> InstanComplexObject;
     //public int BasicIndex;
@@ -59,14 +60,15 @@ public class ControllerInputManager: MonoBehaviour {
     public float throwForce = 1.5f;
 
     // Use this for initialization
-    void Start () {
+    void Awake () {
         TrackObj = GetComponent<SteamVR_TrackedObject>();
-        TeleportLine = GetComponentInChildren<LineRenderer>();
+        if (TeleportLineRender == null)
+            TeleportLineRender = GetComponentInChildren<LineRenderer>();
     }
 	
 	// Update is called once per frame
 	void Update () {
-            ControllerDevice = SteamVR_Controller.Input((int)TrackObj.index);
+        ControllerDevice = SteamVR_Controller.Input((int)TrackObj.index);
 
         //(only Lefthand)--->for Teleporting
         if (forHand == Hand.LeftHand)
@@ -74,35 +76,53 @@ public class ControllerInputManager: MonoBehaviour {
             //To show the moving place
             if (ControllerDevice.GetTouch(SteamVR_Controller.ButtonMask.Touchpad))
             {
-                TeleportLine.gameObject.SetActive(true);
-                TeleporterTargetObject.SetActive(true);
-                TeleportLine.SetPosition(0, transform.position);
+                //Debug.Log("ControllerDevice.rigibody.velocity:" + gameObject.GetComponent<Rigidbody>().velocity + "\nControllerDevice.rigibody.angularVelocity:" + gameObject.GetComponent<Rigidbody>().angularVelocity);
+                isCanTeleport = false;
+                TeleportLineRender.gameObject.SetActive(true);
                 RaycastHit hitInfo;
                 if (Physics.Raycast(transform.position, transform.forward, out hitInfo, 15.0f, TeleporterLayer))
                 {
-                    TeleporterLocation = hitInfo.transform.position;
-                    TeleportLine.SetPosition(1, TeleporterLocation);
+                    TeleporterLocation = hitInfo.point;
+                    TeleportLineRender.numPositions = 2;
+                    TeleportLineRender.SetPosition(0, transform.position);
+                    TeleportLineRender.SetPosition(1, TeleporterLocation);
+                    isCanTeleport = true;
                 }
                 else
                 {
-                    TeleporterLocation = transform.position + transform.forward * 15;
-                    TeleportLine.SetPosition(1, transform.position + transform.forward * 15);
+                    Vector3 TempDirectionPoint = transform.position + transform.forward * 15;
                     RaycastHit groundRayhit;
-                    if (Physics.Raycast(TeleporterLocation, -Vector3.up, out groundRayhit, 17.0f, TeleporterLayer))
+                    if (Physics.Raycast(TempDirectionPoint, -Vector3.up, out groundRayhit, 17.0f, TeleporterLayer))
                     {
-                        TeleporterLocation = new Vector3(transform.position.x + transform.forward.x * 15, groundRayhit.transform.position.y, transform.position.z + transform.forward.z * 15);
+                        //TeleporterLocation = new Vector3(transform.position.x + transform.forward.x * 15, groundRayhit.transform.position.y, transform.position.z + transform.forward.z * 15);
+                        TeleporterLocation = groundRayhit.point;
+                        TeleportLine.DrawBezierLine(TeleportLineRender, transform.position, TempDirectionPoint, TeleporterLocation, 20);
+                        isCanTeleport = true;
+                    }
+                    else
+                    {
+                        TeleportLineRender.numPositions = 2;
+                        TeleportLineRender.SetPosition(0, transform.position);
+                        TeleportLineRender.SetPosition(1, TempDirectionPoint);
+                        //TeleporterLocation = Player.transform.position;
+                        isCanTeleport = false;
                     }
                 }
-                TeleporterTargetObject.transform.position = TeleporterLocation + Vector3.up;
+                if (isCanTeleport)
+                {
+                    TeleporterTargetObject.transform.position = TeleporterLocation + (Vector3.up * 0.001f);
+                    TeleporterTargetObject.SetActive(true);
+                }
+                
             }
 
             //To teleport the player
             if (ControllerDevice.GetPressDown(SteamVR_Controller.ButtonMask.Touchpad))
             {
-                if (TeleporterLocation != null)
+                if (isCanTeleport)
                 {
                     Player.transform.position = TeleporterLocation;
-                    TeleportLine.gameObject.SetActive(false);
+                    TeleportLineRender.gameObject.SetActive(false);
                     TeleporterTargetObject.SetActive(false);
                 }
             }
@@ -110,7 +130,7 @@ public class ControllerInputManager: MonoBehaviour {
             //Romove teleport
             if (ControllerDevice.GetTouchUp(SteamVR_Controller.ButtonMask.Touchpad))
             {
-                TeleportLine.gameObject.SetActive(false);
+                TeleportLineRender.gameObject.SetActive(false);
                 TeleporterTargetObject.SetActive(false);
             }
         }
@@ -122,7 +142,15 @@ public class ControllerInputManager: MonoBehaviour {
             if (ControllerDevice.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
             {
                 MenuAppear();
-
+            }
+            //Menu disappear
+            if (ControllerDevice.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
+            {
+                MenuDisappear();
+            }
+            //SpawnObject
+            if (ControllerDevice.GetPress(SteamVR_Controller.ButtonMask.Trigger))
+            {
                 if (ControllerDevice.GetTouchDown(SteamVR_Controller.ButtonMask.Touchpad))
                 {
                     //Record the Axis of x and y on firstTouch
@@ -202,11 +230,6 @@ public class ControllerInputManager: MonoBehaviour {
                     SpawnObject();
                 }
             }
-            //Menu disappear
-            if (ControllerDevice.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
-            {
-                MenuDisappear();
-            }
         }
 	}
 
@@ -233,11 +256,13 @@ public class ControllerInputManager: MonoBehaviour {
     private void MenuAppear()
     {
         objectMenuManager.Appear();
+        UIOBjects.gameObject.SetActive(true);
     }
 
     private void MenuDisappear()
     {
         objectMenuManager.Disappear();
+        UIOBjects.gameObject.SetActive(false);
     }
     
     private void SpawnObject()
@@ -248,6 +273,7 @@ public class ControllerInputManager: MonoBehaviour {
     //Grab and Throw the object
     private void OnTriggerStay(Collider other)
     {
+        //Debug.LogWarning("enterOnTriggerStay");
         if (ControllerDevice.GetPressDown(SteamVR_Controller.ButtonMask.Grip))
         {
             GrabbingObject(other);
@@ -262,9 +288,11 @@ public class ControllerInputManager: MonoBehaviour {
     {
         if (GrabbingOBJ.CompareTag("Throwable") && BallReset.ballThrowable)
         {
+            Debug.Log(BallReset.ballThrowable);
             GrabbingOBJ.transform.SetParent(gameObject.transform);
             GrabbingOBJ.GetComponent<Rigidbody>().isKinematic = true;
             ControllerDevice.TriggerHapticPulse(2000);
+            BallReset.isOnHand = true;
         }
         if (GrabbingOBJ.CompareTag("Structure"))
         {
@@ -276,24 +304,27 @@ public class ControllerInputManager: MonoBehaviour {
 
     void ThrowingObject(Collider GrabbingOBJ)
     {
-        if (GrabbingOBJ.CompareTag("Throwable"))
+        if (GrabbingOBJ.CompareTag("Throwable") && BallReset.ballThrowable)
         {
             GrabbingOBJ.transform.SetParent(null);
             Rigidbody colliRid = GrabbingOBJ.GetComponent<Rigidbody>();
             colliRid.isKinematic = false;
-            colliRid.velocity = ControllerDevice.velocity * throwForce;
-            colliRid.angularVelocity = ControllerDevice.angularVelocity;
-            if (!BallReset.ballThrowable)
+            if (ControllerDevice.velocity == Vector3.zero)
+                colliRid.velocity = transform.forward * 5 * throwForce;
+            else
             {
-                GrabbingOBJ.GetComponent<MeshRenderer>().material.color = Color.red;
-                GrabbingOBJ.gameObject.layer = LayerMask.NameToLayer("AntiCheat");
+                colliRid.velocity = ControllerDevice.velocity * throwForce;
+                colliRid.angularVelocity = ControllerDevice.angularVelocity;
             }
+            //Debug.Log("ball.velocity:"+colliRid.velocity+ "\nball.angularVelocity:"+colliRid.angularVelocity);
+            //Debug.Log("ControllerDevice.velocity:" + ControllerDevice.velocity + "\nControllerDevice.angularVelocity:" + ControllerDevice.angularVelocity);
+            BallReset.isOnHand = false;
         }
         if (GrabbingOBJ.CompareTag("Structure"))
         {
             GrabbingOBJ.transform.SetParent(null);
             Rigidbody colliRid = GrabbingOBJ.GetComponent<Rigidbody>();
-            colliRid.isKinematic = false;
+            colliRid.isKinematic = true;
         }
     }
 }
