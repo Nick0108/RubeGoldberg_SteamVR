@@ -1,42 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ObjectMenuManager : MonoBehaviour {
 
     public List<GameObject> BasicObjects;
     public List<GameObject> ComplexObjects;
     private List<GameObject> CurrentList;
+    public UIObjectMenuManager ObjectsUI;
 
-    public List<Sprite> BasicObjectImages;
-    public List<Sprite> ComplexObjectImages;
+    public int BasicIndex;
+    public int ComplexIndex;
+    public int currentIndex;
 
-    public Image SelectedBorder;
-
-    public Image BasicMiddleImage;
-    public Image BasicLeftImage;
-    public Image BasicRightImage;
-
-    public Image ComplexMiddleImage;
-    public Image ComplexLeftImage;
-    public Image ComplexRightImage;
-
-    public Text BasicMiddleText;
-    public Text BasicLeftText;
-    public Text BasicRightText;
-
-    public Text ComplexMiddleText;
-    public Text ComplexLeftText;
-    public Text ComplexRightText;
-
-    public Text SpawnNum;
-
-    int BasicIndex;
-    int ComplexIndex;
-    int currentIndex;
-
-    bool isBasic;
+    public bool isBasic;
     public MyGameManager myGameManager;
 
     private void Start()
@@ -57,8 +34,9 @@ public class ObjectMenuManager : MonoBehaviour {
         }
     }
 
-    public void SwipeRight()
+    public void SwipeLeft()
     {
+        //Debug.Log("SwipeRight");
         CurrentList[currentIndex].SetActive(false);
         currentIndex++;
         if (currentIndex > CurrentList.Count - 1)
@@ -66,87 +44,57 @@ public class ObjectMenuManager : MonoBehaviour {
             currentIndex = 0;
         }
         CurrentList[currentIndex].SetActive(true);
-        CheckCurrentCanvas();
+        ObjectsUI.CheckCurrentCanvas(isBasic,currentIndex);
     }
-    public void SwipeLeft()
+    public void SwipeRight()
     {
         CurrentList[currentIndex].SetActive(false);
         currentIndex--;
-        if (currentIndex > CurrentList.Count - 1)
+        if (currentIndex < 0)
         {
             currentIndex = CurrentList.Count - 1;
         }
         CurrentList[currentIndex].SetActive(true);
-        CheckCurrentCanvas();
+        ObjectsUI.CheckCurrentCanvas(isBasic,currentIndex);
     }
     public void SwipeUp()
     {
+        //Debug.Log("SwipeUp");
         if (!isBasic)
         {
+            //Debug.Log("SwipeUp--2");
+            CurrentList[currentIndex].SetActive(false);
             ComplexIndex = currentIndex;
             CurrentList = BasicObjects;
             currentIndex = BasicIndex;
+            CurrentList[currentIndex].SetActive(true);
             isBasic = true;
-            SelectedBorder.transform.localPosition.Set(0, 0.4f, 0);
+            ObjectsUI.UpSelectedBorder();
         }
     }
     public void SwipeDown()
     {
+        //Debug.Log("SwipeDown");
         if (isBasic)
         {
+            //Debug.Log("SwipeDown--2");
+            CurrentList[currentIndex].SetActive(false);
             BasicIndex = currentIndex;
             CurrentList = ComplexObjects;
             currentIndex = ComplexIndex;
+            CurrentList[currentIndex].SetActive(true);
             isBasic = false;
-            SelectedBorder.transform.localPosition.Set(0, -0.47f, 0);
+            ObjectsUI.DownSelectedBorder();
         }
         
     }
     public void Appear()
     {
-        gameObject.SetActive(true);
         CurrentList[currentIndex].SetActive(true);
     }
     public void Disappear()
     {
-        gameObject.SetActive(false);
         CurrentList[currentIndex].SetActive(false);
-    }
-
-    public void CheckCurrentCanvas()
-    {
-        if (isBasic)
-        {
-            BasicMiddleImage.sprite = BasicObjectImages[currentIndex];
-            BasicMiddleText.text = BasicMiddleImage.sprite.name;
-            if (currentIndex - 1 < 0)
-                BasicLeftImage.sprite = BasicObjectImages[BasicObjectImages.Count - 1];
-            else
-                BasicLeftImage.sprite = BasicObjectImages[currentIndex - 1];
-            BasicLeftText.text = BasicLeftImage.sprite.name;
-
-            if (currentIndex + 1 > BasicObjectImages.Count - 1)
-                BasicRightImage.sprite = BasicObjectImages[0];
-            else
-                BasicLeftImage.sprite = BasicObjectImages[currentIndex + 1];
-            BasicRightText.text = BasicRightImage.sprite.name;
-        }
-        else
-        {
-            ComplexMiddleImage.sprite = ComplexObjectImages[currentIndex];
-            ComplexMiddleText.text = ComplexMiddleImage.sprite.name;
-            if (currentIndex - 1 < 0)
-                ComplexLeftImage.sprite = ComplexObjectImages[ComplexObjectImages.Count - 1];
-            else
-                ComplexLeftImage.sprite = ComplexObjectImages[currentIndex - 1];
-            ComplexLeftText.text = ComplexLeftImage.sprite.name;
-
-            if (currentIndex + 1 > ComplexObjectImages.Count - 1)
-                ComplexRightImage.sprite = ComplexObjectImages[0];
-            else
-                ComplexLeftImage.sprite = ComplexObjectImages[currentIndex + 1];
-            ComplexRightText.text = ComplexRightImage.sprite.name;
-        }
     }
 
     public void SpawnObject()
@@ -165,10 +113,11 @@ public class ObjectMenuManager : MonoBehaviour {
             Rigidbody[] newObjectRigidbodys = newObject.GetComponentsInChildren<Rigidbody>();
             foreach (Rigidbody rigid in newObjectRigidbodys)
             {
-                rigid.isKinematic = false;
+                rigid.isKinematic = true;
             }
+            newObject.transform.SetParent(null);
             myGameManager.SpawnNum--;
-            SpawnNum.text = "SpawnNum : " + myGameManager.SpawnNum;
+            ObjectsUI.UpdateSpawnNumUI(myGameManager.SpawnNum);
         }
     }
 }

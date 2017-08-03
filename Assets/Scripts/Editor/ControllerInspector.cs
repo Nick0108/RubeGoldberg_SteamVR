@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿/*#if UNITY_EDITOR 
 using UnityEditor;
+#endif 
 
 public class ControllerInspector : Editor {
 
@@ -15,7 +14,8 @@ public class ControllerInspector : Editor {
         //LeftHand
         private SerializedProperty TeleporterTargetObject;
         private SerializedProperty Player;
-        private SerializedProperty TeleporterLayer;
+        private SerializedProperty TeleportLineRender;
+        public SerializedProperty TeleporterLayer;
         //RightHand
         private SerializedProperty objectMenuManager;
         //Both hand
@@ -27,6 +27,7 @@ public class ControllerInspector : Editor {
             //LeftHand
             TeleporterTargetObject = obj.FindProperty("TeleporterTargetObject");
             Player = obj.FindProperty("Player");
+            TeleportLineRender = obj.FindProperty("TeleportLineRender");
             TeleporterLayer = obj.FindProperty("TeleporterLayer");
             //RightHand
             objectMenuManager = obj.FindProperty("objectMenuManager");
@@ -43,6 +44,7 @@ public class ControllerInspector : Editor {
             {  
                 EditorGUILayout.PropertyField(TeleporterTargetObject);
                 EditorGUILayout.PropertyField(Player);
+                EditorGUILayout.PropertyField(TeleportLineRender);
                 EditorGUILayout.PropertyField(TeleporterLayer);
             }
             if (controllerInputManager.forHand == ControllerInputManager.Hand.RightHand)
@@ -53,3 +55,4 @@ public class ControllerInspector : Editor {
         }  
     }  
 }
+*/
