@@ -7,9 +7,12 @@ public class TrampolineResilience : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        float v = other.attachedRigidbody.velocity.magnitude;
-        if (v > 10.0f)
-            v = 10.0f;
-        other.attachedRigidbody.AddForce(gameObject.transform.forward * resilience * v, ForceMode.Force);
+        if (other.CompareTag("Throwable"))
+        {
+            float v = other.attachedRigidbody.velocity.magnitude;
+            if (v > 10.0f)
+                v = 10.0f;
+            other.attachedRigidbody.AddForce(gameObject.transform.forward * resilience * v, ForceMode.Force);
+        }
     }
 }
